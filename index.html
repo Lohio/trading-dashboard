@@ -1,0 +1,70 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trading Agent — Dashboard</title>
+<style>
+:root{--bg:#fafafa;--card:#fff;--ink:#1a1a2e;--muted:#6b7280;--line:#e5e7eb}
+@media(prefers-color-scheme:dark){:root{--bg:#101014;--card:#1a1a22;--ink:#e8e8ef;--muted:#9ca3af;--line:#2e2e3a}}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.5 system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);padding:24px;max-width:960px;margin:auto}
+h1{font-size:20px;margin-bottom:2px} h2{font-size:15px;margin:26px 0 8px}
+.muted{color:var(--muted)} .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.tile .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.tile .v{font-size:22px;font-weight:650;margin-top:2px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+tr:last-child td{border-bottom:none}
+.chartwrap{position:relative;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:var(--line);stroke-width:1} .tick{fill:var(--muted);font-size:11px}
+.cross{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.tip{position:absolute;background:var(--ink);color:var(--bg);padding:3px 9px;border-radius:6px;font-size:12px;pointer-events:none}
+footer{margin-top:26px;font-size:12px;color:var(--muted)}
+</style></head><body>
+<h1>🤖 Trading Agent — Paper</h1>
+<div class="sub">Cuenta PA3RXLY1ZZ9N · generado 12-Aug-2026 17:45 · se regenera tras cada corrida diaria</div>
+<div class="tiles">
+<div class="tile"><div class="k">Equity</div><div class="v">$100,453</div></div>
+<div class="tile"><div class="k">Hoy</div><div class="v"><span style="color:#1a7f37">+0.08%</span></div></div>
+<div class="tile"><div class="k">Desde el inicio</div><div class="v"><span style="color:#1a7f37">+0.45%</span></div></div>
+<div class="tile"><div class="k">Operaciones</div><div class="v">5</div></div>
+</div>
+<h2>Curva de equity</h2>
+
+<div class="chartwrap">
+<svg id="eq" viewBox="0 0 860 260" role="img" aria-label="Curva de equity del paper trading">
+  <line x1="44" y1="216" x2="816" y2="216" class="grid"/><line x1="44" y1="159" x2="816" y2="159" class="grid"/><line x1="44" y1="101" x2="816" y2="101" class="grid"/><line x1="44" y1="44" x2="816" y2="44" class="grid"/><text x="38" y="220" class="tick" text-anchor="end">97,966</text><text x="38" y="163" class="tick" text-anchor="end">98,871</text><text x="38" y="105" class="tick" text-anchor="end">99,776</text><text x="38" y="48" class="tick" text-anchor="end">100,681</text>
+  <polyline points="44.0,87.2 92.2,88.2 140.5,90.7 188.8,116.4 237.0,114.3 285.2,166.9 333.5,204.1 381.8,204.1 430.0,177.3 478.2,129.0 526.5,99.3 574.8,61.2 623.0,65.5 671.2,69.0 719.5,55.9 767.8,56.5 816.0,63.4" fill="none" stroke="#2563eb" stroke-width="2"/>
+  <line id="cross" x1="0" y1="44" x2="0" y2="216" class="cross" visibility="hidden"/>
+  <circle id="dot" r="4" fill="#2563eb" visibility="hidden"/>
+</svg>
+<div id="tip" class="tip" hidden></div>
+</div>
+<script>
+const D=[{"f": "20-Jul", "v": 100000.0}, {"f": "21-Jul", "v": 99982.82}, {"f": "22-Jul", "v": 99944.54}, {"f": "23-Jul", "v": 99538.42}, {"f": "24-Jul", "v": 99571.42}, {"f": "27-Jul", "v": 98741.38}, {"f": "28-Jul", "v": 98153.01}, {"f": "29-Jul", "v": 98153.01}, {"f": "30-Jul", "v": 98576.41}, {"f": "31-Jul", "v": 99339.95}, {"f": "03-Aug", "v": 99808.11}, {"f": "04-Aug", "v": 100409.15}, {"f": "05-Aug", "v": 100341.39}, {"f": "06-Aug", "v": 100287.27}, {"f": "07-Aug", "v": 100494.07}, {"f": "10-Aug", "v": 100483.95}, {"f": "11-Aug", "v": 100375.27}],M=44,W=860,H=260,VMIN=97965.7252,VR=2715.6296;
+const svg=document.getElementById('eq'),tip=document.getElementById('tip'),
+cross=document.getElementById('cross'),dot=document.getElementById('dot');
+svg.addEventListener('mousemove',e=>{
+ const r=svg.getBoundingClientRect(),sx=W/r.width;
+ const px=(e.clientX-r.left)*sx;
+ const i=Math.max(0,Math.min(D.length-1,Math.round((px-M)/((W-2*M)/(D.length-1)))));
+ const X=M+i*(W-2*M)/(D.length-1),Y=H-M-(D[i].v-VMIN)*(H-2*M)/VR;
+ cross.setAttribute('x1',X);cross.setAttribute('x2',X);cross.removeAttribute('visibility');
+ dot.setAttribute('cx',X);dot.setAttribute('cy',Y);dot.removeAttribute('visibility');
+ tip.hidden=false;tip.textContent=D[i].f+' — $'+D[i].v.toLocaleString();
+ tip.style.left=Math.min(e.clientX-r.left+12,r.width-140)+'px';tip.style.top='8px';
+});
+svg.addEventListener('mouseleave',()=>{tip.hidden=true;cross.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');});
+</script>
+<h2>Posiciones abiertas</h2>
+<table><tr><th>Símbolo</th><th>Cant.</th><th>Entrada</th><th>Actual</th><th>Valor</th><th>P&L</th></tr><tr><td>SPY</td><td>44</td><td>748.67</td><td>772.32</td><td>$33,982</td><td><span style="color:#1a7f37">+1,040.59</span> (<span style="color:#1a7f37">+3.16%</span>)</td></tr></table>
+<h2>Operaciones ejecutadas</h2>
+<table><tr><th>Fecha</th><th>Lado</th><th>Cant.</th><th>Símbolo</th><th>Precio</th></tr><tr><td>31-Jul 13:34</td><td>🔴 VENTA</td><td>48</td><td>QQQ</td><td>694.56</td></tr><tr><td>28-Jul 13:35</td><td>🔴 VENTA</td><td>48</td><td>QQQ</td><td>674.87</td></tr><tr><td>27-Jul 13:31</td><td>🔴 VENTA</td><td>48</td><td>QQQ</td><td>691.13</td></tr><tr><td>27-Jul 13:33</td><td>🔴 VENTA</td><td>48</td><td>QQQ</td><td>690.55</td></tr><tr><td>21-Jul 17:14</td><td>🔴 VENTA</td><td>44</td><td>SPY</td><td>748.67</td></tr></table>
+<h2>Señales por manga (última evaluación · 🌘 = sombra, no opera)</h2>
+<table><tr><th>Manga</th><th>Símbolo</th><th>Fecha</th><th>Señal</th><th>Cierre</th><th>RSI2</th></tr><tr><td>RSI2_SPY</td><td>SPY</td><td>2026-08-12</td><td>plana</td><td>772.49</td><td>66.7</td></tr><tr><td>RSI2_QQQ</td><td>QQQ</td><td>2026-08-12</td><td>plana</td><td>723.7</td><td>76.1</td></tr><tr><td>TSMOM_SPY</td><td>SPY</td><td>2026-08-12</td><td>LARGO</td><td>772.49</td><td>66.7</td></tr><tr><td>SOMBRA_BBZ_SPY 🌘</td><td>SPY</td><td>2026-08-12</td><td>plana</td><td>772.48999</td><td>66.7</td></tr><tr><td>SOMBRA_BBZ_EURUSD 🌘</td><td>EURUSD=X</td><td>2026-08-12</td><td>CORTO</td><td>1.15274</td><td>27.4</td></tr></table>
+<h2>Señales FX emitidas</h2>
+<table><tr><th>Fecha</th><th>Par</th><th>Dirección</th><th>Precio</th><th>Stop sugerido</th><th>Cierre</th></tr><tr><td>2026-08-05</td><td>EURUSD</td><td>CORTO</td><td>1.15594</td><td>115 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-05</td><td>EURUSD</td><td>CORTO</td><td>1.15553</td><td>116 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-06</td><td>EURUSD</td><td>CORTO</td><td>1.15247</td><td>113 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-06</td><td>EURUSD</td><td>CORTO</td><td>1.15221</td><td>113 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-07</td><td>EURUSD</td><td>CORTO</td><td>1.1562</td><td>113 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-07</td><td>EURUSD</td><td>CORTO</td><td>1.1562</td><td>113 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-10</td><td>EURUSD</td><td>CORTO</td><td>1.1546</td><td>112 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-11</td><td>EURUSD</td><td>CORTO</td><td>1.1542</td><td>106 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-12</td><td>EURUSD</td><td>CORTO</td><td>1.1554</td><td>102 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr><tr><td>2026-08-12</td><td>EURUSD</td><td>CORTO</td><td>1.15274</td><td>105 pips</td><td>salir cuando |z|<0.5 (reversion a la media, ~dias)</td></tr></table>
+<footer>Solo lectura. Logs completos: informes/tarea.log · decisiones.jsonl · shadow_log.csv — Kill switch: crear archivo KILL_SWITCH en la carpeta del bot.</footer>
+</body></html>
